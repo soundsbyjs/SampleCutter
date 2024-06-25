@@ -14,14 +14,20 @@ def calculate_note_duration(velocity):
     return velocity * 480
 
 # Iterate through all notes and alternate velocities
+start_time = 0
 for notenum in range(0, 128):  # Note numbers 0 to 127
     for vel in range(0, 127, 2):  # Velocities 0, 2, 4, ..., 126
         # Note on event
-        track.append(mido.Message('note_on', note=notenum, velocity=vel, time=0))
+        track.append(mido.Message('note_on', note=notenum, velocity=vel, time=start_time))
+        start_time = start_time + 480
         
         # Insert a delay for reverb tail or sustain effect
-        note_duration = calculate_note_duration(vel)
-        track.append(mido.Message('note_off', note=notenum, velocity=vel, time=note_duration))
+        # note_duration = calculate_note_duration(vel)
+        track.append(mido.Message('note_off', note=notenum, velocity=vel, time=start_time))
+        start_time = start_time + 480
+        track.append(mido.Message('note_off', note=notenum, velocity=vel, time=start_time))
+        start_time = start_time + 480
+        
 
 # Insert a measure of silence (4 beats in 4/4 time at standard tempo)
 silence_ticks = 4 * 480  # 4 beats * 480 ticks per beat (adjust tempo if necessary)
@@ -30,4 +36,3 @@ track.append(mido.Message('note_off', note=0, velocity=0, time=0))  # Release th
 
 # Save the MIDI file
 mid.save('every_other_velocity_with_reverb_and_silence.mid')
-
